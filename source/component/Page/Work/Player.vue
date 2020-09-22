@@ -2,8 +2,8 @@
     
     div( :class='classes' @click='max' )
         div( class='player' ref='player' :style='styles' )
-            video( class='video' ref='video' src='video/cut-4-1.mp4' disablePictureInPicture='true' preload )
-            div( :class='{ poster: true, hide: !stopped }' :style='{ backgroundImage: "url(\'video/cut-4-1-poster.jpg\')" }' )
+            video( class='video' ref='video' :src='$root.getData(work.video)' preload )
+            img( :class='{ poster: true, hide: !stopped }' :src='$root.getData(work.poster)' )
             PlayerControls( :video='$refs.video' ref='controls'
                 @start='stopped = false'
                 @close='min' )
@@ -11,7 +11,7 @@
             div( class='player-play-div small' v-if='stopped' )
                 img( class='player-play small' src='~src/assets/img/page/play-icon-small.png' )
 
-            div( class='player-play-div big' )
+            div( class='player-play-div big' v-if='stopped' )
                 img( class='player-play big' src='~src/assets/img/page/play-icon-big.png' )
 
 </template>
@@ -20,7 +20,7 @@
 import PlayerControls from ':src/component/Page/Work/PlayerControls.vue'
 
 export default {
-    props: ['position'],
+    props: ['work', 'source', 'position'],
     components: { PlayerControls },
     methods: { open, close, min, max },
     data: function () {
@@ -47,7 +47,6 @@ export default {
     }
 
 }
-
 
 function open () {
     this.classes['open'] = true
@@ -169,6 +168,7 @@ function min () {
         background-size cover
         height 100%
         width 100%
+        object-fit cover
         position absolute
         left 0
         top 0

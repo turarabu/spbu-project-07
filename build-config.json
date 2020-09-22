@@ -1,0 +1,6 @@
+{
+    "asar": false,
+    "directories": {
+        "output": "../desktop-app-dist"
+    }
+}

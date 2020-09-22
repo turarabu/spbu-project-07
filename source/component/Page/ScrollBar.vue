@@ -42,6 +42,14 @@ function start () {
         this.moveable = true
     })
 
+    this.$refs.thumb.addEventListener('touchstart', event => {
+        event = event.touches[0]
+        
+        this.mouseStart = event.clientY
+        this.moveable = true
+    })
+
+
     window.addEventListener('mousemove', event => {
         if ( this.moveable  ) {
             let currentY = event.clientY - this.top()
@@ -52,7 +60,24 @@ function start () {
         }
     })
 
+    window.addEventListener('touchmove', event => {
+        event = event.touches[0]
+
+        if ( this.moveable  ) {
+            let currentY = event.clientY - this.top()
+            let percentY = Math.max(0, Math.min(100, currentY * 100 / this.bottom()))
+            this.thumbY = Math.max(0, Math.min(this.bottom(), currentY))
+
+            this.$emit('scroll', percentY)
+        }
+    })
+
+
     window.addEventListener('mouseup', () => {
+        this.moveable = false
+    })
+
+    window.addEventListener('touchend', () => {
         this.moveable = false
     })
 }

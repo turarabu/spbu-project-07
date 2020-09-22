@@ -58,14 +58,14 @@ function signAnimates () {
 // Enter animation
 function enter (el) {
     setTimeout(() => {
-        this.action.footer = ['show-line', 'show-arrows']
+        this.action.footer = ['show-line']
 
         setTimeout(() => {
             this.action.category = 'show-links'
         }, 200)
 
         setTimeout(() => {
-            this.action.footer = ['show-langs', 'split-arrows']
+            this.action.footer = ['show-langs']
         }, 300)
     }, 300)
 }
@@ -73,10 +73,10 @@ function enter (el) {
 // Leave animation
 function leave (el, done) {
     this.action.category = 'hide-links'
-    this.action.footer = ['hide-langs', 'join-arrows']
+    this.action.footer = ['hide-langs']
 
     setTimeout(() => {
-        this.action.footer = ['hide-line', 'hide-arrows']
+        this.action.footer = ['hide-line']
 
         setTimeout(done, 600)
     }, 300)

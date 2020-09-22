@@ -4,7 +4,7 @@
         div( class='bg-clips full' )
         Header(  )
 
-        div( class='page-div full' )
+        div( v-if='list' class='page-div full' )
             div( class='page-scroll' )
                 div( class='page-content' ref='scrollBlock' )
                     div( class='content' ref='scrollContent' )
@@ -13,11 +13,12 @@
                         div( v-for='(line, a) in list' class='list' :key='a' )
                             Work( v-for='(work, b) in line'
                                 v-bind='{ call: action.work, id: a*5+b }'
+                                :work='work'
                                 :ref='`work-${a*5+b}`' :key='b' @open='open' @close='close' )
 
             ScrollBar( @scroll='scroll' ref='scrollBar' )
 
-            InfoBar( :class='[action.infobar]' )
+            InfoBar( :class='[action.infobar]' v-bind='{ list, openedId }' )
             img( class='close-black' :class='{ show: !opened }'
                 src='~src/assets/img/page/close-black.png' @click='close' )
             img( class='close-white' :class='{ show: opened }'
@@ -34,10 +35,11 @@ import ScrollBar from ':src/component/Page/ScrollBar.vue'
 export default {
     components: { Header, Work, InfoBar, ScrollBar },
     computed: { title, pageName, list },
-    methods: { open, close, scroll },
+    methods: { open, close, scroll, array },
     mounted: start,
     data: function () {
         return {
+            loaded: false,
             openedId: null,
             name: this.$route.params.name,
             opened: false,
@@ -64,24 +66,45 @@ function title () {
 }
 
 function list () {
-    var array = new Array(11)
-    var list = []
+    if ( !this.loaded )
+        return false
 
-    while (array.length > 0)
-        list.push(array.splice(0, 5))
+    var copy = [...this.loaded]
+    var result = []
 
-    return list
+    while ( copy.length > 0 )
+        result.push(copy.splice(0, 5))
+
+    console.log(result)
+    return result
 }
 
-function start () {
-    this.$nextTick(signAnimates)
-    this.$refs.scrollBlock.addEventListener('scroll', () => {
-        var height = this.$refs.scrollContent.offsetHeight
-        var view = this.$refs.scrollBlock.offsetHeight
-        var scrolled = this.$refs.scrollBlock.scrollTop
-        var percent = 100 * scrolled / (height - view)
+function array (count) {
+    var length = new Array(count)
+    var response = []
+    var work = this.$store.state.works[0]
 
-        this.$refs.scrollBar.scroll(percent)
+    for ( let i of length )
+        response.push(work)
+
+    return response
+}
+
+async function start () {
+    var parent = this.$route.params.name
+    this.loaded = await this.ipc('get-list', { parent })
+    console.log(this.loaded)
+
+    this.$nextTick(signAnimates)
+    this.$nextTick(() => {
+        this.$refs.scrollBlock.addEventListener('scroll', () => {
+            var height = this.$refs.scrollContent.offsetHeight
+            var view = this.$refs.scrollBlock.offsetHeight
+            var scrolled = this.$refs.scrollBlock.scrollTop
+            var percent = 100 * scrolled / (height - view)
+
+            this.$refs.scrollBar.scroll(percent)
+        })
     })
 }
 

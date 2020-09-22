@@ -1,22 +1,19 @@
 <template lang='pug'>
     
     div( class='work' :class='classList' :style='extraStyles' @click='click' )
-        Player( ref='player' )
+        Player( :work='work' :source='work.video' ref='player' )
 
         div( class='metas-div' )
-            h3( class='work-title' ) Евдокия (1961 г.)
-            p( class='meta-key' ) Режисёр:
-                span( class='meta-value' ) Татьяна Лиознова
+            h3( class='work-title' ) {{ title }}
 
-            p( class='meta-key' ) Место съёмок:
-                span( class='meta-value' ) г. Тула
+            p( v-for='meta in firsts' class='meta-key' ) {{ meta[lang].key }}:
+                span( class='meta-value' ) {{ meta[lang].value }}
 
         div( class='gallery' )
             div( class='gallery-arrow left' @click='slide(-700)' )
             div( class='images-div' )
-                img( class='image' src='img/gallery/4-1-1.jpg' )
-                img( class='image' src='img/gallery/4-1-2.jpg' )
-                img( class='image' src='img/gallery/4-1-3.jpg' )
+                template( v-for='(image, id) in work.gallery' )
+                    img( class='image' :src='$root.getData(image.src)' @click='gallery(id)' )
 
             div( class='gallery-arrow right' @click='slide(700)' )
 
@@ -26,9 +23,10 @@
 import Player from ':src/component/Page/Work/Player.vue'
 
 export default {
-    props: ['call', 'id'],
+    props: ['call', 'id', 'work'],
     components: { Player },
-    methods: { click, hide, show, focus, blur, slide },
+    computed: { lang, firsts, title },
+    methods: { click, gallery, hide, show, focus, blur, slide },
     mounted: start,
     data: function () {
         return {
@@ -50,6 +48,19 @@ export default {
 
         }
     }
+}
+
+function lang () {
+    return this.$store.state.lang
+}
+
+function firsts () {
+    var copy = [...this.work.metas]
+    return copy.splice(0, 2)
+}
+
+function title () {
+    return this.work.title[this.$store.state.lang]
 }
 
 function start () {
@@ -85,6 +96,13 @@ function click () {
         this.$emit('open', this.id)
         this.opened = true
     }
+}
+
+function gallery (id) {
+    this.$store.commit('openGallery', {
+        list: this.work.gallery,
+        index: id
+    })
 }
 
 function focus () {

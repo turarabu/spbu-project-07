@@ -4,6 +4,7 @@
         div#bg-color( class='full' )
 
         router-view( class='full' )
+        Gallery( v-if='gallery !== false' v-bind='{ gallery }' )
 
         div( class='timer' v-if='timer' )
             div( class='timer-notice' )
@@ -20,8 +21,11 @@
 </template>
 
 <script>
+import Gallery from ':src/component/Main/Gallery.vue'
+
 export default {
-    computed: { hideText, page },
+    components: { Gallery },
+    computed: { hideText, gallery, page },
     methods: { hideBlocks, showBlocks, cancel },
     mounted: start,
     data: function () {
@@ -35,6 +39,10 @@ export default {
             }
         }
     }
+}
+
+function gallery () {
+    return this.$store.state.gallery
 }
 
 function page () {
@@ -60,6 +68,10 @@ function cancel () {
 }
 
 function start () {
+    this.$root.getData = function (path) {
+        return `file:///${ external.electron.remote.app.thisPath }/${ path }`
+    }
+
     window.addEventListener('mousemove', () => {
         this.$store.commit('active', new Date())
     })
@@ -71,9 +83,12 @@ function start () {
         if ( this.$route.name === 'main' )
             this.$store.commit('active', new Date())
 
-        else if ( (now - last) > (30 * 60 * 1000) ) {
+        else if ( (now - last) > (5 * 60 * 1000) ) {
             if ( this.timer === false ) {
                 this.timer = setTimeout(() => {
+                    if ( this.gallery !== false )
+                        this.$store.commit('openGallery', false)
+
                     this.$router.push('/')
 
                     let remover = this.$router.afterEach(() => {

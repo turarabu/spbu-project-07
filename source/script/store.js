@@ -12,12 +12,14 @@ function storage() {
 
 function getStore() {
     return {
-        mutations: { setLang, active },
+        mutations: { setLang, openGallery, galleryIndex, active },
         modules: {},
         state: {
             lang: 'ru',
             hideText: false,
+            gallery: false,
             category: getCategory(),
+            works: getWorks(),
             lastActive: new Date()
         }
     }
@@ -33,6 +35,14 @@ function setLang(state, lang) {
             state.hideText = false
         }, 150)
     }, 300)
+}
+
+function openGallery(state, payload) {
+    state.gallery = payload
+}
+
+function galleryIndex(state, index) {
+    state.gallery.index = index
 }
 
 function active(state, date) {
@@ -92,4 +102,15 @@ function getCategory() {
             }
         },
     ]
+}
+
+function getWorks() {
+    return [{
+        video: 'video/cut-4-1.mp4',
+        gallery: ['img/gallery/4-1-1.jpg', 'img/gallery/4-1-2.jpg', 'img/gallery/4-1-3.jpg'],
+        title: {
+            en: 'Evdokya (1961 г.)',
+            ru: 'Евдокия (1961 г.)'
+        }
+    }]
 }

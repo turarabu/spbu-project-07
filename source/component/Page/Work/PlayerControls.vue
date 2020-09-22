@@ -69,23 +69,32 @@ function close () {
 function signEvents () {
     this.updateTimer()
 
-    this.listener.playing = this.video.addEventListener('timeupdate', this.e_timeupdate)
+    this.video.addEventListener('timeupdate', this.e_timeupdate)
 
-    this.listener.play = this.video.addEventListener('play', this.e_play)
-    this.listener.play = this.video.addEventListener('pause', this.e_pause)
-    this.listener.touch = this.$refs.timing.addEventListener('mousedown', this.e_mousedown)
+    this.video.addEventListener('play', this.e_play)
+    this.video.addEventListener('pause', this.e_pause)
 
-    this.listener.blur = this.$refs.timing.addEventListener('mouseup', this.e_mouseup)
-    this.listener.move = window.addEventListener('mousemove', this.e_mousemove)
+    this.$refs.timing.addEventListener('mousedown', this.e_mousedown)
+    this.$refs.timing.addEventListener('mouseup', this.e_mouseup)
+    window.addEventListener('mousemove', this.e_mousemove)
+
+    this.$refs.timing.addEventListener('touchstart', this.e_mousedown)
+    this.$refs.timing.addEventListener('touchend', this.e_mouseup)
+    window.addEventListener('touchmove', this.e_mousemove)
 }
 
 function unsignEvents () {
     this.video.removeEventListener('timeupdate', this.e_timeupdate)
     this.video.removeEventListener('play', this.e_play)
     this.video.removeEventListener('pause', this.e_pause)
+
     this.$refs.timing.removeEventListener('mousedown', this.e_mousedown)
     this.$refs.timing.removeEventListener('mouseup', this.e_mouseup)
     window.removeEventListener('mousemove', this.e_mousemove)
+
+    this.$refs.timing.removeEventListener('touchstart', this.e_mousedown)
+    this.$refs.timing.removeEventListener('touchend', this.e_mouseup)
+    window.removeEventListener('touchmove', this.e_mousemove)
 }
 
 function updateTimer () {
@@ -113,11 +122,15 @@ function e_pause ( event ) {
 }
 
 function e_mousedown ( event ) {
+    if ( event.touches )
+        event = event.touches[0]
+
     this.updateTimer()
-    this.video.currentTime = event.offsetX * this.video.duration / event.target.offsetWidth
+    this.video.currentTime = offsetOf(this, event) * this.video.duration / this.$refs.timing.offsetWidth
+    // this.video.currentTime = event.offsetX * this.video.duration / event.target.offsetWidth
     this.moveable = {
-        start: event.clientX - event.offsetX,
-        width: event.target.offsetWidth
+        start: event.clientX - offsetOf(this, event),
+        width: this.$refs.timing.offsetWidth
     }
 }
 
@@ -126,10 +139,13 @@ function e_mouseup ( event ) {
 }
 
 function e_mousemove ( event ) {
-    this.updateTimer()
-
     if ( this.moveable === false )
         return
+
+    if ( event.touches )
+        event = event.touches[0]
+
+    this.updateTimer()
 
     var position = event.clientX - this.moveable.start
     var calculate = Math.max(0, Math.min(this.moveable.width, position))
@@ -138,6 +154,18 @@ function e_mousemove ( event ) {
     this.video.currentTime = newTime
 }
 
+function offsetOf (self, event) {
+    var e = self.$refs.timing
+    var x = e.offsetLeft
+    var p = e.offsetParent
+
+    while ( p.offsetParent ) {
+        x += p.offsetLeft
+        p = p.offsetParent
+    }
+
+    return event.clientX - x
+}
 </script>
 
 <style lang='stylus'>
